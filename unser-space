@@ -1,0 +1,962 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unser Space</title>
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#f6f7f4,#111412);--panel:light-dark(#fff,#191d1a);--panel2:light-dark(#f0f2ed,#222722);--text:light-dark(#172019,#f1f4ef);--muted:light-dark(#6c756e,#aab3aa);--line:light-dark(#e1e5df,#303730);--accent:#6c8f6a;--accent2:#dfe9dc;--shadow:0 12px 30px #0000000c}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+#app{min-height:100vh;background:var(--bg)}
+header{padding:28px 34px 18px;display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(16px);z-index:5}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:13px;background:var(--accent2);display:grid;place-items:center;font-size:21px}
+.brand h1{font-size:19px;margin:0}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}
+.sync{display:flex;align-items:center;gap:7px;margin-left:8px;color:var(--muted);font-size:11px}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.actions{display:flex;gap:9px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:11px;padding:10px 13px;font-weight:650;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:white}
+.btn:hover{filter:brightness(.98)}
+.layout{display:grid;grid-template-columns:235px 1fr;max-width:1320px;margin:auto}
+.side{padding:25px 18px;border-right:1px solid var(--line);min-height:calc(100vh - 90px)}
+.side h3{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:18px 10px 9px}
+.nav{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;cursor:pointer;font-size:14px}
+.nav:hover,.nav.active{background:var(--panel2)}
+.count{margin-left:auto;color:var(--muted);font-size:12px}
+.main{padding:30px 34px 60px}
+.hero{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:26px}
+.hero h2{font-size:32px;letter-spacing:-.04em;margin:0 0 7px}
+.hero p{color:var(--muted);margin:0}
+.search{width:min(320px,100%);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--text);outline:none}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:30px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:17px;box-shadow:var(--shadow)}
+.stat{min-height:112px}
+.stat .icon{font-size:20px}
+.stat b{display:block;font-size:23px;margin-top:12px}
+.stat span{color:var(--muted);font-size:12px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:25px 0 12px}
+.section-head h3{margin:0;font-size:16px}
+.filters{display:flex;gap:7px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 10px;color:var(--muted);cursor:pointer;font-size:12px}
+.chip.active{background:var(--accent2);color:light-dark(#365133,#dce9d9);border-color:transparent}
+.items{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.item{position:relative;min-height:150px}
+.item-top{display:flex;gap:10px;align-items:flex-start}
+.item-icon{width:38px;height:38px;border-radius:11px;background:var(--panel2);display:grid;place-items:center;flex:none}
+.item h4{margin:0 25px 4px 0;font-size:15px}
+.item p{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
+.meta{display:flex;gap:7px;margin-top:15px;align-items:center}
+.tag{font-size:10px;padding:5px 8px;border-radius:999px;background:var(--panel2);color:var(--muted)}
+.more{position:absolute;right:12px;top:12px;border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:17px}
+.empty{padding:35px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:15px;grid-column:1/-1}
+.modal{position:fixed;inset:0;background:#0008;display:none;place-items:center;padding:20px;z-index:20}
+.modal.open{display:grid}
+.dialog{width:min(560px,100%);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:24px}
+.dialog h3{margin:0 0 18px}
+.form{display:grid;gap:12px}
+.form label{font-size:12px;color:var(--muted)}
+.form input,.form textarea,.form select{width:100%;margin-top:6px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:11px;color:var(--text);font:inherit}
+.form textarea{min-height:90px;resize:vertical}
+.dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--text);color:var(--bg);padding:11px 15px;border-radius:999px;font-size:13px;transition:.2s;z-index:30}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:900px){
+.layout{grid-template-columns:1fr}
+.side{display:none}
+.grid{grid-template-columns:repeat(2,1fr)}
+.items{grid-template-columns:1fr}
+.main{padding:24px 18px}
+.hero{align-items:stretch;flex-direction:column}
+header{padding:18px}
+.search{width:100%}
+}
+@media(max-width:520px){
+.grid{grid-template-columns:1fr 1fr}
+.hero h2{font-size:27px}
+.actions .secondary{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+<header>
+<div class="brand">
+<div class="logo">♡</div>
+<div>
+<h1>Unser Space</h1>
+<p>Alles, was euch im Alltag begegnet.</p>
+</div>
+<div class="sync"><span class="sync-dot"></span>Gemeinsamer Space</div>
+</div>
+
+<div class="actions">
+<button class="btn secondary" id="shareBtn">↗ Teilen</button>
+<button class="btn secondary" id="demoBtn">Demo-Inhalte</button>
+<button class="btn primary" id="addBtn">＋ Hinzufügen</button>
+</div>
+</header>
+
+<div class="layout">
+
+<aside class="side">
+
+<h3>Übersicht</h3>
+
+<div class="nav active" data-filter="Alle">
+⌂ <span>Alles</span>
+<span class="count" id="allCount">0</span>
+</div>
+
+<div class="nav" data-filter="Eingang">
+📥 <span>Eingang</span>
+<span class="count" id="inboxCount">0</span>
+</div>
+
+<h3>Bereiche</h3>
+
+<div class="nav" data-filter="Haushalt">🏠 <span>Haushalt</span></div>
+<div class="nav" data-filter="Studium">🎓 <span>Studium</span></div>
+<div class="nav" data-filter="Selbstverbesserung">🧠 <span>Selbstverbesserung</span></div>
+<div class="nav" data-filter="Artikel">📚 <span>Artikel</span></div>
+<div class="nav" data-filter="Reisen">✈️ <span>Reisen</span></div>
+<div class="nav" data-filter="Ideen">💡 <span>Ideen</span></div>
+
+<div class="nav" data-filter="Favoriten">
+⭐ <span>Favoriten</span>
+<span class="count" id="favCount">0</span>
+</div>
+
+<h3>System</h3>
+<div class="nav" id="clearBtn">↺ <span>Lokale Demo-Daten zurücksetzen</span></div>
+
+</aside>
+
+<main class="main">
+
+<div class="hero">
+<div>
+<h2 id="pageTitle">Alles an einem Ort.</h2>
+<p>Speichern, was euch über den Weg läuft – später wiederfinden.</p>
+</div>
+<input class="search" id="search" placeholder="⌕  Suchen …">
+</div>
+
+<div class="grid">
+
+<div class="card stat">
+<div class="icon">📥</div>
+<b id="statInbox">0</b>
+<span>im Eingang</span>
+</div>
+
+<div class="card stat">
+<div class="icon">🔖</div>
+<b id="statSaved">0</b>
+<span>gespeicherte Dinge</span>
+</div>
+
+<div class="card stat">
+<div class="icon">👩‍❤️‍👨</div>
+<b>2</b>
+<span>gemeinsame Personen</span>
+</div>
+
+<div class="card stat">
+<div class="icon">☁️</div>
+<b>Sync</b>
+<span>gemeinsamer Space</span>
+</div>
+
+</div>
+
+<div class="section-head">
+<h3>Zuletzt hinzugefügt</h3>
+
+<div class="filters" id="filters">
+<button class="chip active" data-filter="Alle">Alle</button>
+<button class="chip" data-filter="Eingang">Eingang</button>
+<button class="chip" data-filter="Haushalt">Haushalt</button>
+<button class="chip" data-filter="Studium">Studium</button>
+<button class="chip" data-filter="Selbstverbesserung">Selbstverbesserung</button>
+<button class="chip" data-filter="Artikel">Artikel</button>
+<button class="chip" data-filter="Reisen">Reisen</button>
+<button class="chip" data-filter="Ideen">Ideen</button>
+</div>
+</div>
+
+<div class="items" id="items"></div>
+
+<div class="section-head">
+<h3>Aktivität</h3>
+</div>
+
+<div class="card" id="activity" style="margin-bottom:10px">
+<p style="margin:0;color:var(--muted);font-size:13px">
+Noch keine gemeinsamen Aktivitäten.
+</p>
+</div>
+
+</main>
+</div>
+</div>
+
+<div class="modal" id="modal">
+<div class="dialog">
+
+<h3>Etwas Neues ablegen</h3>
+
+<div class="form">
+
+<label>
+Titel
+<input id="fTitle" placeholder="z. B. Schöner Schreibtisch gesehen">
+</label>
+
+<label>
+Beschreibung / Link
+<textarea id="fDesc" placeholder="Was ist es? Optional: Link einfügen …"></textarea>
+</label>
+
+<label>
+Datei oder Bild
+<input id="fFile" type="file" accept="image/*,.pdf,.doc,.docx,.txt">
+</label>
+
+<label>
+Bereich
+<select id="fCat">
+<option>Eingang</option>
+<option>Haushalt</option>
+<option>Studium</option>
+<option>Selbstverbesserung</option>
+<option>Artikel</option>
+<option>Reisen</option>
+<option>Ideen</option>
+</select>
+</label>
+
+<label>
+Von wem?
+<select id="fWho">
+<option>Du</option>
+<option>Sie</option>
+<option>Gemeinsam</option>
+</select>
+</label>
+
+</div>
+
+<div class="dialog-actions">
+<button class="btn" id="cancel">Abbrechen</button>
+<button class="btn primary" id="save">Speichern</button>
+</div>
+
+</div>
+</div>
+
+<div class="modal" id="shareModal">
+<div class="dialog">
+
+<h3>Gemeinsamer Space</h3>
+
+<p style="color:var(--muted);line-height:1.5">
+Ihr seid jetzt cloudverbunden. Mit demselben Space erscheinen neue Einträge und Kommentare automatisch auf beiden Geräten.
+</p>
+
+<div class="card" style="margin-top:14px">
+<b>☁️ Cloud-Sync</b>
+<p id="accountInfo" style="margin:6px 0 0;color:var(--muted);font-size:13px">
+Angemeldet
+</p>
+</div>
+
+<div class="dialog-actions">
+<button class="btn" id="shareCancel">Schließen</button>
+<button class="btn" id="logoutBtn">Abmelden</button>
+</div>
+
+</div>
+</div>
+
+<div class="modal open" id="loginModal">
+<div class="dialog">
+
+<h3>Willkommen bei Unser Space</h3>
+
+<p style="color:var(--muted);line-height:1.5">
+Melde dich an, damit dein Space auf mehreren Geräten synchron bleibt.
+</p>
+
+<div class="form">
+
+<label>
+E-Mail
+<input id="authEmail" type="email" autocomplete="email" placeholder="du@beispiel.de">
+</label>
+
+<label>
+Passwort
+<input id="authPassword" type="password" autocomplete="current-password" placeholder="Mindestens 6 Zeichen">
+</label>
+
+</div>
+
+<div class="dialog-actions">
+<button class="btn" id="signupBtn">Konto erstellen</button>
+<button class="btn primary" id="loginBtn">Anmelden</button>
+</div>
+
+<p id="authStatus" style="margin:12px 0 0;color:var(--muted);font-size:12px"></p>
+
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal" id="detailModal">
+<div class="dialog">
+
+<h3 id="detailTitle">Eintrag</h3>
+
+<p id="detailDesc" style="color:var(--muted);line-height:1.5"></p>
+
+<div id="detailMeta" class="meta"></div>
+
+<div id="detailFile" style="margin-top:10px"></div>
+
+<div style="display:flex;gap:8px;margin-top:14px">
+<button class="btn" id="detailFav">☆ Favorit</button>
+</div>
+
+<div class="card" style="margin-top:14px">
+
+<b>💬 Kommentare</b>
+
+<div id="comments" style="margin-top:10px"></div>
+
+<div style="display:flex;gap:8px;margin-top:12px">
+
+<select id="commentWho" class="search" style="width:90px">
+<option>Du</option>
+<option>Sie</option>
+</select>
+
+<input id="commentInput" class="search" style="flex:1" placeholder="Etwas dazu schreiben …">
+
+<button class="btn primary" id="commentAdd">Senden</button>
+
+</div>
+</div>
+
+<div class="dialog-actions">
+<button class="btn" id="detailClose">Schließen</button>
+</div>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const supabase=window.supabase.createClient(
+'https://ftmbisefpjncuokrlkkz.supabase.co',
+'sb_publishable_029Uv8QlNMvq0QCrk8Rs1Q_dHaHoswf'
+);
+
+let cloudUser=null;
+let spaceId=null;
+
+const seed=[
+{id:1,title:'Schöne Schreibtisch-Idee',desc:'Minimalistischer Arbeitsplatz – vielleicht etwas für die neue Wohnung.',cat:'Haushalt',icon:'🏠',who:'Du'},
+{id:2,title:'Artikel über Gewohnheiten',desc:'Interessanter Ansatz zu kleinen täglichen Routinen.',cat:'Artikel',icon:'📚',who:'Sie'},
+{id:3,title:'Masterkurs merken',desc:'Studiengang und Zulassungsvoraussetzungen später anschauen.',cat:'Studium',icon:'🎓',who:'Du'},
+{id:4,title:'5 Dinge, die wir ausprobieren wollen',desc:'Kleine Ideen für mehr gemeinsame Zeit im Alltag.',cat:'Ideen',icon:'💡',who:'Sie'},
+{id:5,title:'Guter Podcast zum Thema Fokus',desc:'Für einen ruhigen Sonntag speichern.',cat:'Selbstverbesserung',icon:'🧠',who:'Du'}
+];
+
+let items=JSON.parse(localStorage.getItem('ourspace-items')||'null')||seed;
+
+items=items.map(x=>({...x,fav:!!x.fav}));
+
+let active='Alle';
+
+let activity=JSON.parse(
+localStorage.getItem('ourspace-activity')||'[]'
+);
+
+let selectedId=null;
+
+let comments=JSON.parse(
+localStorage.getItem('ourspace-comments')||'{}'
+);
+
+const $=id=>document.getElementById(id);
+
+function saveStore(){
+localStorage.setItem('ourspace-items',JSON.stringify(items));
+}
+
+function toast(s){
+$('toast').textContent=s;
+$('toast').classList.add('show');
+setTimeout(()=>$('toast').classList.remove('show'),1800);
+}
+
+function render(){
+
+const q=$('search').value.toLowerCase();
+
+const shown=items.filter(x=>
+(active==='Alle'||
+(active==='Favoriten'?x.fav:x.cat===active))&&
+(x.title+' '+x.desc+' '+x.cat+' '+(x.who||''))
+.toLowerCase()
+.includes(q)
+);
+
+$('items').innerHTML=shown.length?
+
+shown.map(x=>`
+
+<article class="card item" data-open="${x.id}">
+
+<button class="more" data-fav="${x.id}" title="Favorit">
+${x.fav?'★':'☆'}
+</button>
+
+<button class="more" style="right:40px" data-del="${x.id}" title="Löschen">
+⋯
+</button>
+
+<div class="item-top">
+
+<div class="item-icon">
+${x.icon}
+</div>
+
+<div>
+
+<h4>${esc(x.title)}</h4>
+
+<p>${linkify(x.desc)}</p>
+
+${x.fileName?
+`<p style="margin-top:8px;font-size:11px">
+📎 ${esc(x.fileName)}
+</p>`:''}
+
+</div>
+
+</div>
+
+<div class="meta">
+<span class="tag">${x.cat}</span>
+<span class="tag">${x.who||'Gemeinsam'}</span>
+</div>
+
+</article>
+
+`).join('')
+
+:
+
+`<div class="empty">
+Noch nichts gefunden. Legt einfach etwas über „＋ Hinzufügen“ ab.
+</div>`;
+
+const inbox=items.filter(x=>x.cat==='Eingang').length;
+
+$('allCount').textContent=items.length;
+$('inboxCount').textContent=inbox;
+$('favCount').textContent=items.filter(x=>x.fav).length;
+$('statInbox').textContent=inbox;
+$('statSaved').textContent=items.length-inbox;
+
+$('pageTitle').textContent=
+active==='Alle'?'Alles an einem Ort.':active;
+
+document.querySelectorAll('[data-filter]')
+.forEach(e=>
+e.classList.toggle('active',e.dataset.filter===active)
+);
+
+$('activity').innerHTML=activity.length?
+
+activity.slice(0,5).map(a=>`
+
+<p style="margin:0 0 8px;font-size:13px">
+<b>${esc(a.who)}</b>
+${esc(a.text)}
+<span style="color:var(--muted);font-size:11px">
+· ${esc(a.time)}
+</span>
+</p>
+
+`).join('')
+
+:
+
+`<p style="margin:0;color:var(--muted);font-size:13px">
+Noch keine Aktivitäten.
+</p>`;
+
+}
+
+function esc(s){
+
+return String(s).replace(
+/[&<>'"]/g,
+c=>({
+'&':'&amp;',
+'<':'&lt;',
+'>':'&gt;',
+"'":'&#39;',
+'"':'&quot;'
+}[c])
+);
+
+}
+
+function linkify(s){
+
+const safe=esc(s);
+
+return safe.replace(
+/(https?:\/\/[^\s<]+)/g,
+'<a href="$1" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:underline">$1</a>'
+);
+
+}
+
+function setFilter(f){
+
+active=f;
+render();
+
+}
+
+function openDetail(id){
+
+const x=items.find(x=>x.id==id);
+
+if(!x)return;
+
+selectedId=id;
+
+$('detailTitle').textContent=x.title;
+
+$('detailDesc').innerHTML=linkify(x.desc);
+
+$('detailMeta').innerHTML=
+'<span class="tag">'+esc(x.cat)+'</span>'+
+'<span class="tag">'+esc(x.who||'Gemeinsam')+'</span>';
+
+$('detailFile').innerHTML=x.fileName?
+'<span class="tag">📎 '+esc(x.fileName)+'</span>':'';
+
+$('detailFav').textContent=
+x.fav?'★ Favorit':'☆ Favorit';
+
+$('comments').innerHTML=
+(comments[id]||[]).map(c=>
+'<p style="margin:0 0 8px;font-size:13px">'+
+'<b>'+esc(c.who)+'</b> '+
+'<span style="color:var(--muted)">'+esc(c.text)+'</span>'+
+'</p>'
+).join('')
+
+||
+
+'<p style="margin:0;color:var(--muted);font-size:13px">'+
+'Noch keine Kommentare.'+
+'</p>';
+
+$('detailModal').classList.add('open');
+
+}
+
+async function cloudLoad(){
+
+const {data:space}=await supabase.rpc('setup_my_space');
+
+if(!space)
+throw new Error('Space konnte nicht erstellt werden');
+
+spaceId=space;
+
+const {data,error}=await supabase
+.from('items')
+.select('*')
+.eq('space_id',spaceId)
+.order('created_at',{ascending:false});
+
+if(error)throw error;
+
+if(data?.length){
+
+items=data.map(x=>({
+...x,
+id:x.id,
+fav:!!x.favorite,
+fileName:x.file_name||''
+}));
+
+}else if(items.length){
+
+const rows=items.map(x=>({
+space_id:spaceId,
+title:x.title,
+description:x.desc||'',
+category:x.cat,
+icon:x.icon,
+who:x.who||'Gemeinsam',
+favorite:!!x.fav,
+file_name:x.fileName||'',
+created_by:cloudUser.id
+}));
+
+await supabase.from('items').insert(rows);
+
+const fresh=await supabase
+.from('items')
+.select('*')
+.eq('space_id',spaceId)
+.order('created_at',{ascending:false});
+
+if(!fresh.error)
+
+items=fresh.data.map(x=>({
+...x,
+id:x.id,
+fav:!!x.favorite,
+fileName:x.file_name||'',
+desc:x.description,
+cat:x.category
+}));
+
+}
+
+render();
+
+supabase.channel('our-space-sync')
+
+.on(
+'postgres_changes',
+{
+event:'*',
+schema:'public',
+table:'items',
+filter:`space_id=eq.${spaceId}`
+},
+()=>cloudLoad()
+)
+
+.on(
+'postgres_changes',
+{
+event:'*',
+schema:'public',
+table:'comments'
+},
+()=>selectedId&&openDetail(selectedId)
+)
+
+.subscribe();
+
+}
+
+async function startAuth(){
+
+const {
+data:{session}
+}=await supabase.auth.getSession();
+
+if(session){
+
+cloudUser=session.user;
+
+$('loginModal').classList.remove('open');
+
+$('accountInfo').textContent=
+session.user.email||'Angemeldet';
+
+try{
+
+await cloudLoad();
+
+}catch(e){
+
+$('authStatus').textContent=e.message;
+
+}
+
+}else{
+
+$('loginModal').classList.add('open');
+
+}
+
+supabase.auth.onAuthStateChange(
+(_event,session)=>{
+
+if(session){
+
+cloudUser=session.user;
+
+$('loginModal').classList.remove('open');
+
+cloudLoad();
+
+}
+
+}
+);
+
+}
+
+document.querySelectorAll('[data-filter]')
+.forEach(e=>
+e.addEventListener(
+'click',
+()=>setFilter(e.dataset.filter)
+)
+);
+
+$('search').addEventListener('input',render);
+
+$('addBtn').onclick=()=>{
+
+$('modal').classList.add('open');
+
+$('fTitle').focus();
+
+};
+
+$('cancel').onclick=()=>
+$('modal').classList.remove('open');
+
+$('shareBtn').onclick=()=>
+$('shareModal').classList.add('open');
+
+$('shareCancel').onclick=()=>
+$('shareModal').classList.remove('open');
+
+$('logoutBtn').onclick=()=>
+supabase.auth.signOut();
+
+$('detailClose').onclick=()=>
+$('detailModal').classList.remove('open');
+
+$('loginBtn').onclick=async()=>{
+
+const {error}=await supabase.auth.signInWithPassword({
+
+email:$('authEmail').value.trim(),
+
+password:$('authPassword').value
+
+});
+
+$('authStatus').textContent=
+error?
+error.message:
+'Angemeldet …';
+
+};
+
+$('signupBtn').onclick=async()=>{
+
+const {error}=await supabase.auth.signUp({
+
+email:$('authEmail').value.trim(),
+
+password:$('authPassword').value
+
+});
+
+$('authStatus').textContent=
+error?
+error.message:
+'Konto erstellt – prüfe ggf. deine E-Mail.';
+
+};
+
+$('detailFav').onclick=async()=>{
+
+const x=items.find(x=>x.id==selectedId);
+
+if(!x)return;
+
+x.fav=!x.fav;
+
+await supabase
+.from('items')
+.update({favorite:x.fav})
+.eq('id',x.id);
+
+openDetail(selectedId);
+
+render();
+
+};
+
+$('commentAdd').onclick=async()=>{
+
+const t=$('commentInput').value.trim();
+
+if(!t||!selectedId)return;
+
+const who=$('commentWho').value;
+
+await supabase
+.from('comments')
+.insert({
+item_id:selectedId,
+user_id:cloudUser?.id,
+author_name:who,
+body:t
+});
+
+$('commentInput').value='';
+
+openDetail(selectedId);
+
+};
+
+$('save').onclick=async()=>{
+
+const t=$('fTitle').value.trim();
+
+if(!t)
+return toast('Bitte einen Titel eingeben.');
+
+const cat=$('fCat').value;
+
+const icons={
+Eingang:'📥',
+Haushalt:'🏠',
+Studium:'🎓',
+Selbstverbesserung:'🧠',
+Artikel:'📚',
+Reisen:'✈️',
+Ideen:'💡'
+};
+
+const file=$('fFile').files[0];
+
+const who=$('fWho').value;
+
+const row={
+space_id:spaceId,
+title:t,
+description:$('fDesc').value.trim()||'Ohne Beschreibung',
+category:cat,
+icon:icons[cat],
+who,
+favorite:false,
+file_name:file?.name||'',
+created_by:cloudUser.id
+};
+
+const {error}=await supabase
+.from('items')
+.insert(row);
+
+if(error)
+return toast('Speichern fehlgeschlagen');
+
+$('modal').classList.remove('open');
+
+$('fTitle').value='';
+$('fDesc').value='';
+$('fFile').value='';
+
+await cloudLoad();
+
+toast(
+file?
+'Mit Datei gespeichert ✓':
+'Gespeichert ✓'
+);
+
+};
+
+$('items').addEventListener(
+'click',
+e=>{
+
+const card=e.target.closest('.item');
+
+if(
+card&&
+!e.target.dataset.fav&&
+!e.target.dataset.del
+)
+openDetail(card.dataset.open);
+
+}
+);
+
+$('items').addEventListener(
+'click',
+async e=>{
+
+const fav=e.target.dataset.fav;
+
+if(fav){
+
+const x=items.find(x=>x.id==fav);
+
+x.fav=!x.fav;
+
+await supabase
+.from('items')
+.update({favorite:x.fav})
+.eq('id',x.id);
+
+render();
+
+toast(
+x.fav?
+'Zu Favoriten hinzugefügt ✓':
+'Aus Favoriten entfernt'
+);
+
+}
+
+const id=e.target.dataset.del;
+
+if(id){
+
+await supabase
+.from('items')
+.delete()
+.eq('id',id);
+
+await cloudLoad();
+
+toast('Eintrag gelöscht');
+
+}
+
+}
+);
+
+$('demoBtn').onclick=()=>
+toast('Demo-Modus ist jetzt durch Cloud-Sync ersetzt');
+
+$('clearBtn').onclick=()=>
+toast('Lokale Demo-Daten sind nicht mehr aktiv');
+
+startAuth();
+
+</script>
+
+</body>
+</html>
